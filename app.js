@@ -17,6 +17,7 @@ import schedules from './routes/schedules';
 import categories from './routes/categories';
 import roles from './routes/roles';
 import questionsRouter from './routes/questions';
+import answersRouter from './routes/answers';
 import academicReportsRouter from './routes/academicReports';
 import nonAcademicReportsRouter from './routes/nonAcademicReports';
 
@@ -54,6 +55,7 @@ app.use('/api/auth', authRouter);
 
 // Assestment Data
 app.use('/api/questions', questionsRouter);
+app.use('/api/answers', answersRouter);
 
 // Learning Report
 app.use('/api/academic-reports', academicReportsRouter);

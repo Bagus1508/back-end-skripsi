@@ -4,17 +4,21 @@ const models = require('../models/index');
 const upload = require('../middleware/upload'); // Import middleware upload
 const { Sequelize, where } = require('sequelize');
 
-/* GET questions listing. */
+/* GET answers listing. */
 router.get('/', async function(req, res, next) {
   try {
     //mengambil semua data
-    const questions = await models.questions.findAll({
+    const answers = await models.answers.findAll({
+      where: {
+        ...req.query,
+      },
       attributes: [
         'id',
-        'schedule_id',
-        'question',
-        'grade',
-        'score',  
+        'question_id',
+        'option',
+        'description',
+        'attachment',  
+        'is_true_answer',  
         [
           Sequelize.literal(`CONCAT('${req.protocol}://${req.get('host')}/uploads/', attachment)`),
           'attachment'
@@ -22,11 +26,11 @@ router.get('/', async function(req, res, next) {
       ]
     });    
     
-    if (questions.length !== 0) {
+    if (answers.length !== 0) {
       res.json({
         'status': 'OK',
-        'messages': 'Data Pertanyaan Berhasil Ditampilkan',
-        'data': questions
+        'messages': 'Data Jawaban Berhasil Ditampilkan',
+        'data': answers
       });
     } else {
       res.json({
@@ -51,13 +55,17 @@ router.get('/:id', async function(req, res, next) {
     //mengangkap param ID
     const id = req.params.id;
 
-    const questionData = await models.questions.findByPk(id, {
+    const answersData = await models.answers.findAll({
+      where: {
+        question_id: id,
+      },
       attributes: [
         'id',
-        'schedule_id',
-        'question',
-        'grade',
-        'score',  
+        'question_id',
+        'option',
+        'description',
+        'attachment',  
+        'is_true_answer', 
         [
           Sequelize.literal(`CONCAT('${req.protocol}://${req.get('host')}/uploads/', attachment)`),
           'attachment'
@@ -65,11 +73,11 @@ router.get('/:id', async function(req, res, next) {
       ]
     });    	
     
-    if (questionData) {
+    if (answersData) {
       res.json({
         'status': 'OK',
-        'messages': 'Pertanyaan berhasil ditampilkan',
-        'data': questionData
+        'messages': 'Jawaban berhasil ditampilkan',
+        'data': answersData
       });
     } else {
       res.status(404).json({
@@ -93,34 +101,34 @@ router.get('/:id', async function(req, res, next) {
 router.post('/store', upload.single('attachment'), async function (req, res, next) {
   try {
     const { 
-      schedule_id,
-      question,
-      grade,
-      score
+      question_id,
+      option,
+      description,
+      is_true_answer
     } = req.body;
 
-    const schedules = await models.schedules.findByPk(req.body.schedule_id);
-    if (!schedules) {
-      return res.status(404).json({ status: 'ERROR', messages: 'Schedule tidak ditemukan' });
+    const questions = await models.questions.findByPk(req.body.question_id);
+    if (!questions) {
+      return res.status(404).json({ status: 'ERROR', messages: 'Pertanyaan tidak ditemukan' });
     }    
 
     // Cek apakah ada file yang diupload
     const attachment = req.file ? req.file.filename : null;
 
     // Simpan ke database
-    const questionData = await models.questions.create({
-      schedule_id,
-      question,
+    const answersData = await models.answers.create({
+      question_id,
+      option,
+      description,
       attachment, // Simpan nama file di database
-      grade,
-      score
+      is_true_answer
     });
 
     res.status(201).json({
       status: 'OK',
-      messages: 'Soal berhasil ditambahkan',
+      messages: 'Jawaban berhasil ditambahkan',
       data: {
-        ...questionData.toJSON(),
+        ...answersData.toJSON(),
         attachment_url: attachment ? `${req.protocol}://${req.get('host')}/uploads/${attachment}` : null
       }
     });
@@ -144,16 +152,16 @@ router.put('/update/:id', upload.single('attachment'), async function(req, res, 
     const path = require('path');
 
     const {
-      schedule_id,
-      question,
-      grade,
-      score
+      question_id,
+      option,
+      description,
+      is_true_answer
     } = req.body
 
-    // Cari data pertanyaan lama
-    const oldQuestion = await models.questions.findByPk(id);
+    // Cari data Jawaban lama
+    const oldQuestion = await models.answers.findByPk(id);
     if (!oldQuestion) {
-      return res.status(404).json({ status: 'ERROR', messages: 'Soal tidak ditemukan' });
+      return res.status(404).json({ status: 'ERROR', messages: 'Jawaban tidak ditemukan' });
     }
 
     // Jika ada file lama, hapus dari sistem
@@ -164,40 +172,36 @@ router.put('/update/:id', upload.single('attachment'), async function(req, res, 
       }
     }
 
-    console.log(req.body);
+    const questions = await models.questions.findByPk(req.body.question_id);
     
-    
-    const schedules = await models.schedules.findByPk(req.body.schedule_id);
-    
-    if (!schedules) {
+    if (!questions) {
       return res.status(404).json({ status: 'ERROR', messages: 'Jadwal tidak ditemukan' });
     }    
 
     // Cek apakah ada file yang diupload
     const attachment = req.file ? req.file.filename : null;
     
-    const questionData = models.questions.update({
-      schedule_id,
-      question,
+    const answersData = models.answers.update({
+      question_id,
+      option,
+      description,
       attachment, // Simpan nama file di database
-      grade,
-      score
+      is_true_answer
     }, {
       where: {
         id: id
       }
     })
 
-    const updatedQuestions = await models.questions.findOne({
+    const updatedanswers = await models.answers.findOne({
       where: { id: id },
-      include: [{ model: models.schedules, as: 'schedule_detail' }],
     });
 
-    if (questionData) {
+    if (answersData) {
       res.json({
         'status': 'OK',
-        'messages': 'Soal berhasil diubah',
-        data: updatedQuestions,
+        'messages': 'Jawaban berhasil diubah',
+        data: updatedanswers,
       })
     }
   } catch(err) {
@@ -215,7 +219,7 @@ router.put('/update/:id', upload.single('attachment'), async function(req, res, 
 router.delete('/delete/:id', async function(req, res, next) {
   try {
     const id = req.params.id;
-    const deletedRows = await models.questions.destroy({
+    const deletedRows = await models.answers.destroy({
       where: {
         id: id
       }
@@ -230,7 +234,7 @@ router.delete('/delete/:id', async function(req, res, next) {
   
     res.json({
       status: 'OK',
-      messages: 'Soal berhasil dihapus'
+      messages: 'Jawaban berhasil dihapus'
     });
   } catch (err) {
     res.status(500).json({

@@ -16,6 +16,8 @@ module.exports = (sequelize, DataTypes) => {
   answers.init({
     question_id: DataTypes.INTEGER,
     option: DataTypes.STRING,
+    description: DataTypes.STRING,
+    attachment: DataTypes.STRING,
     is_true_answer: DataTypes.BOOLEAN
   }, {
     sequelize,

@@ -10,10 +10,26 @@ module.exports = {
         type: Sequelize.INTEGER
       },
       question_id: {
-        type: Sequelize.INTEGER
+        type: Sequelize.INTEGER,
+        allowNull: false,
+        references: {
+          model: 'questions',
+          key: 'id',
+        },
+        onUpdate: 'CASCADE',
+        onDelete: 'CASCADE',
       },
       option: {
-        type: Sequelize.STRING
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      description: {
+        type: Sequelize.STRING,
+        allowNull: false
+      },
+      attachment: {
+        type: Sequelize.STRING,
+        allowNull: true,
       },
       is_true_answer: {
         type: Sequelize.BOOLEAN,
