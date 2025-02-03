@@ -8,8 +8,17 @@ const multer = require('multer');
 
 import indexRouter from './routes/index';
 import usersRouter from './routes/users';
+import teachersRouter from './routes/teachers';
+import studentsRouter from './routes/students';
 import authRouter from './routes/auth';
 import classRoomsRouter from './routes/classRooms';
+import subjects from './routes/subjects';
+import schedules from './routes/schedules';
+import categories from './routes/categories';
+import roles from './routes/roles';
+import questionsRouter from './routes/questions';
+import academicReportsRouter from './routes/academicReports';
+import nonAcademicReportsRouter from './routes/nonAcademicReports';
 
 // Konfigurasi penyimpanan file jika diperlukan
 const storage = multer.diskStorage({
@@ -25,9 +34,9 @@ const app = express();
 const upload = multer({ storage: storage });
 
 app.use(cors({
-  origin: 'http://localhost:5173', // Mengizinkan hanya dari origin ini
-  methods: ['GET', 'POST', 'PUT', 'DELETE'], // Mengizinkan metode HTTP tertentu
-  allowedHeaders: ['Content-Type', 'Authorization'], // Mengizinkan header tertentu
+  origin: 'http://localhost:5173',
+  methods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowedHeaders: ['Content-Type', 'Authorization'],
 }));
 
 // Middleware
@@ -43,11 +52,25 @@ app.use('/', indexRouter);
 // Auth
 app.use('/api/auth', authRouter);
 
-// Master - User
-app.use('/api/users', usersRouter);
+// Assestment Data
+app.use('/api/questions', questionsRouter);
 
-// Master - Class Room
+// Learning Report
+app.use('/api/academic-reports', academicReportsRouter);
+app.use('/api/non-academic-reports', nonAcademicReportsRouter);
+
+// Master
+app.use('/api/users', usersRouter);
+app.use('/api/students', studentsRouter);
+app.use('/api/teachers', teachersRouter);
 app.use('/api/class-rooms', classRoomsRouter);
+app.use('/api/subjects', subjects);
+app.use('/api/schedules', schedules);
+app.use('/api/categories', categories);
+app.use('/api/roles', roles);
+
+//Uploads
+app.use('/uploads', express.static('uploads'));
 
 // Catch 404 and forward to error handler
 app.use(function(req, res, next) {

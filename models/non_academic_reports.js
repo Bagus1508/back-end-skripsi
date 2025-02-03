@@ -3,29 +3,29 @@ const {
   Model
 } = require('sequelize');
 module.exports = (sequelize, DataTypes) => {
-  class users extends Model {
+  class non_academic_reports extends Model {
     /**
      * Helper method for defining associations.
      * This method is not a part of Sequelize lifecycle.
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-      users.hasOne(models.userDetails, { foreignKey: 'user_id', as: 'userDetails' });
+      // define association here
     }
   }
-  users.init({
-    username: DataTypes.STRING,
-    password: DataTypes.STRING,
-    role_id: DataTypes.INTEGER,
-    created_at: DataTypes.DATE,
-    updated_at: DataTypes.DATE
+  non_academic_reports.init({
+    user_id: DataTypes.INTEGER,
+    subject_id: DataTypes.INTEGER,
+    schedule_id: DataTypes.INTEGER,
+    score: DataTypes.FLOAT,
+    achievement: DataTypes.STRING,
+    status: DataTypes.INTEGER
   }, {
     sequelize,
-    modelName: 'users',
-    timestamps: true,
-    tableName: 'users',
+    modelName: 'non_academic_reports',
+    tableName: 'non_academic_reports',
     createdAt: 'created_at',
     updatedAt: 'updated_at'
   });
-  return users;
+  return non_academic_reports;
 };
